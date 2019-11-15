@@ -1,18 +1,35 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const SportModel = require('./sports-model')
+const SportsModel = require('./sports-model')
 
-const { validateUser } = require("../users/users-helpers.js");
+router.get('/', (req, res)=> {
+    SportsModel.find()
+    .then(teams =>
+        res.json(teams))
+})
+
+router.delete('/:id', (req, res)=>{
+    const {id}= req.params
+    console.log(id)
+    SportsModel.remove(id)
+    .then(deleted => {
+        if(deleted){
+            res.status(201).json({removed: deleted})
+        }else{
+            res.status(404).json({message: 'Could not find Team.'})
+        }
+    })
+    .catch(err => {
+        res.status(500).json({message: "Failed to delete."})
+    })
+})
+
 
 // for endpoints beginning with /api/auth
 router.post('/register', (req, res) => {
     let team = req.body;
     console.log(team)
-    //always validate data before sending to db
-    const validateResult = validateUser(team);
-
-    if (validateResult.isSuccessful === true){
 
     const hash = bcrypt.hashSync(team.password, 10); // 2 ^ n
    team.password = hash;
@@ -26,11 +43,6 @@ router.post('/register', (req, res) => {
         res.status(500).json(err);
       });
 
-    } else {
-        res.status(400).json({
-            message: 'Invalid info about user',
-        errors: validateResult.errors})
-    }
   });
   
   router.post('/login', (req, res) => {

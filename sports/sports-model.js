@@ -5,20 +5,21 @@ module.exports = {
   find,
   findBy,
   findById,
+  remove,
 };
 
 function find() {
     //db must match table in database
-  return db('sports').select('id', 'teamname', 'password', 'sport');
+  return db('olympics').select('id', 'teamname', 'password');
 }
 
 function findBy(filter) {
-  return db('sports').where(filter);
+  return db('olympics').where(filter);
 }
 
 async function add(team) {
     console.log(`add`, team)
-  const [id] = await db('sports').insert(team);
+  const [id] = await db('olympics').insert(team);
 
   return findById(id);
 }
@@ -26,7 +27,13 @@ async function add(team) {
 
 
 function findById(id) {
-  return db('sports')
+  return db('olympics')
     .where({ id })
     .first();
+}
+
+function remove(id){
+    return db('olympics')
+    .delete(id)
+    .where({id: id})
 }
